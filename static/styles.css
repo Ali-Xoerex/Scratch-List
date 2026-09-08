@@ -1,0 +1,499 @@
+/* ============================================================
+   Scratch List — notebook-page todo app
+   ============================================================ */
+
+:root {
+  --paper:        #f6f1e3;
+  --paper-edge:    #ece3cc;
+  --rule-blue:     #b9cee0;
+  --margin-red:    #d98a8a;
+  --ink:           #2e2a3d;
+  --ink-soft:      #5b5670;
+  --pencil:        #8a8577;
+
+  --sticky-1: #f4d35e; /* yellow */
+  --sticky-2: #ee9b5c; /* peach  */
+  --sticky-3: #a8d5ba; /* mint   */
+  --sticky-4: #b3b3f0; /* violet */
+  --sticky-5: #f2a6b0; /* pink   */
+  --sticky-6: #8fbfe0; /* sky    */
+
+  --line-height-row: 42px;
+  --radius-blob: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #d7cdb8;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(255,255,255,0.25), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(0,0,0,0.08), transparent 55%);
+  display: flex;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 56px) 16px;
+  font-family: 'Patrick Hand', cursive;
+  color: var(--ink);
+}
+
+/* -------------------- desk / notebook shell -------------------- */
+
+.desk {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.notebook {
+  position: relative;
+  width: 100%;
+  max-width: 660px;
+  background: var(--paper);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 18px 40px -18px rgba(30, 20, 10, 0.45),
+    0 2px 0 rgba(30, 20, 10, 0.08);
+  padding: 34px clamp(20px, 5vw, 46px) 0 clamp(46px, 9vw, 74px);
+  overflow: hidden;
+}
+
+/* faint paper grain */
+.notebook::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0 1px, transparent 1px 3px);
+}
+
+/* spiral rings down the left edge */
+.rings {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  width: 20px;
+  background-image: radial-gradient(circle, transparent 0 4px, #cabfa4 4.5px 6px, transparent 6.5px);
+  background-size: 20px 34px;
+  background-repeat: repeat-y;
+  background-position: center 20px;
+  z-index: 2;
+}
+.rings::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.18) 0 2px, transparent 2.5px);
+  background-size: 20px 34px;
+  background-position: center 19px;
+}
+
+/* red margin line */
+.page {
+  position: relative;
+  z-index: 1;
+}
+.page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -18px;
+  width: 1.5px;
+  background: var(--margin-red);
+  opacity: 0.55;
+}
+
+/* -------------------- header -------------------- */
+
+.page-header {
+  position: relative;
+  padding-bottom: 14px;
+  margin-bottom: 6px;
+}
+
+.title {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 3.4rem);
+  line-height: 0.9;
+  margin: 0 0 2px 0;
+  color: var(--ink);
+  transform: rotate(-1deg);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+.date-stamp {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+  color: var(--pencil);
+  border: 1.5px solid var(--pencil);
+  border-radius: var(--radius-blob);
+  padding: 4px 12px;
+  transform: rotate(3deg);
+  opacity: 0.8;
+}
+
+/* -------------------- filters (sticky tabs) -------------------- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 8px;
+  padding: 4px 0 18px 0;
+}
+
+.filter-chip {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  padding: 6px 14px 8px;
+  background: #efe6cf;
+  color: var(--ink-soft);
+  border-radius: 3px;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.12);
+  transform: rotate(-1.5deg);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.filter-chip:nth-child(odd) { transform: rotate(1.5deg); }
+
+.filter-chip:hover {
+  transform: translateY(-2px) rotate(0deg);
+}
+
+.filter-chip.active {
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.18);
+  transform: translateY(-3px) rotate(0deg);
+}
+
+/* -------------------- ruled task area -------------------- */
+
+.ruled-area {
+  position: relative;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--line-height-row) - 1px),
+    var(--rule-blue) calc(var(--line-height-row) - 1px),
+    var(--rule-blue) calc(var(--line-height-row) - 1px + 1px)
+  );
+  background-position-y: 8px;
+  padding-top: 8px;
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--line-height-row);
+  padding: 0 2px;
+}
+
+/* checkbox — hand-drawn box + tick */
+.check-box {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 6px;
+}
+.check-box input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+.check-box .box {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--ink-soft);
+  border-radius: 3px 5px 4px 6px;
+  transform: rotate(-2deg);
+  background: transparent;
+  pointer-events: none;
+}
+.check-box svg {
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+}
+.check-box svg path {
+  fill: none;
+  stroke: #3f6d4e;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  transition: stroke-dashoffset 0.28s ease;
+}
+.check-box input:checked ~ svg path {
+  stroke-dashoffset: 0;
+}
+.check-box input:checked ~ .box {
+  border-color: #3f6d4e;
+}
+
+.task-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 1.15rem;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-top: 6px;
+  position: relative;
+}
+
+.task-row.done .task-text {
+  color: var(--pencil);
+}
+.task-row.done .task-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 55%;
+  height: 2px;
+  background: var(--ink-soft);
+  transform: rotate(-1deg);
+  opacity: 0.7;
+}
+
+.category-tag {
+  flex: none;
+  font-size: 0.85rem;
+  font-family: 'Patrick Hand', cursive;
+  padding: 2px 9px 4px;
+  border-radius: 2px;
+  color: #3a3320;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.15);
+  transform: rotate(-2deg);
+  white-space: nowrap;
+}
+.category-tag::before {
+  content: "";
+  position: absolute;
+  margin-top: -14px;
+  margin-left: 6px;
+  width: 16px;
+  height: 6px;
+  background: rgba(255,255,255,0.55);
+  transform: rotate(-8deg);
+}
+
+.deadline-tag {
+  flex: none;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.deadline-tag.overdue {
+  color: #b3372c;
+  border: 1.5px solid #b3372c;
+  border-radius: var(--radius-blob);
+  padding: 1px 9px;
+  transform: rotate(-3deg);
+  display: inline-block;
+}
+
+.delete-btn {
+  flex: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  color: var(--pencil);
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.delete-btn:hover {
+  color: #b3372c;
+  transform: scale(1.15) rotate(-6deg);
+}
+
+.empty-note {
+  font-style: normal;
+  color: var(--pencil);
+  font-size: 1.1rem;
+  padding: 6px 2px 0;
+}
+
+/* -------------------- new task row -------------------- */
+
+.new-task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--line-height-row);
+  padding: 0 2px;
+  margin-top: 2px;
+}
+
+.pencil-mark {
+  flex: none;
+  color: var(--pencil);
+  font-size: 1.3rem;
+  transform: rotate(-6deg);
+  margin-top: 4px;
+}
+
+.task-input,
+.category-input {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed var(--rule-blue);
+  padding: 4px 2px;
+  outline-offset: 3px;
+}
+
+.task-input {
+  flex: 1 1 auto;
+  min-width: 90px;
+}
+
+.category-input {
+  flex: 0 1 130px;
+  min-width: 80px;
+}
+
+.task-input::placeholder,
+.category-input::placeholder {
+  color: var(--pencil);
+  opacity: 0.85;
+}
+
+.date-field {
+  flex: none;
+}
+
+.date-input {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed var(--rule-blue);
+  padding: 4px 2px;
+  width: 132px;
+}
+
+.add-btn {
+  flex: none;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.05rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 3px 6px 4px 7px;
+  padding: 7px 16px 9px;
+  cursor: pointer;
+  transform: rotate(-1deg);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.add-btn:hover {
+  transform: rotate(0deg) translateY(-1px);
+  background: #43405a;
+}
+
+.form-hint {
+  min-height: 1.4em;
+  margin: 2px 2px 18px;
+  color: #b3372c;
+  font-size: 0.95rem;
+}
+
+/* -------------------- torn bottom edge -------------------- */
+
+.torn-edge {
+  height: 16px;
+  margin-top: 6px;
+  background: var(--paper);
+  clip-path: polygon(
+    0% 0%, 4% 100%, 8% 20%, 12% 100%, 16% 15%, 20% 100%, 24% 25%,
+    28% 100%, 32% 10%, 36% 100%, 40% 20%, 44% 100%, 48% 15%,
+    52% 100%, 56% 25%, 60% 100%, 64% 10%, 68% 100%, 72% 20%,
+    76% 100%, 80% 15%, 84% 100%, 88% 25%, 92% 100%, 96% 10%, 100% 100%, 100% 0%
+  );
+}
+
+/* -------------------- focus & accessibility -------------------- */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+.filter-chip:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* -------------------- responsive -------------------- */
+
+@media (max-width: 520px) {
+  .notebook {
+    padding-left: 40px;
+  }
+  .rings {
+    left: 8px;
+    width: 14px;
+    background-size: 14px 34px;
+  }
+  .page::before {
+    left: -14px;
+  }
+  .new-task-row {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 2px;
+    row-gap: 6px;
+  }
+  .task-row {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 6px 2px;
+  }
+  .date-input {
+    width: 118px;
+  }
+}

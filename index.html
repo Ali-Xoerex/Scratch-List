@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scratch List — a to-do list you can scribble on</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<div class="desk">
+  <div class="notebook">
+
+    <div class="rings" aria-hidden="true"></div>
+
+    <main class="page">
+
+      <header class="page-header">
+        <h1 class="title">Scratch List</h1>
+        <p class="subtitle">stuff to do, before I forget it</p>
+        <div class="date-stamp" id="dateStamp" aria-hidden="true"></div>
+      </header>
+
+      <nav class="filters" id="filters" aria-label="Filter by category">
+        <!-- filter chips injected by script.js -->
+      </nav>
+
+      <section class="ruled-area" aria-label="Task list">
+        <ul class="task-list" id="taskList">
+          <!-- tasks injected by script.js -->
+        </ul>
+
+        <p class="empty-note" id="emptyNote" hidden>the page is blank &mdash; jot something down below</p>
+
+        <form class="new-task-row" id="newTaskForm" novalidate>
+          <span class="pencil-mark" aria-hidden="true">+</span>
+
+          <input
+            type="text"
+            id="taskInput"
+            class="task-input"
+            placeholder="write a new task..."
+            autocomplete="off"
+            required
+          >
+
+          <input
+            type="text"
+            id="categoryInput"
+            class="category-input"
+            placeholder="category"
+            list="categoryOptions"
+            autocomplete="off"
+            required
+          >
+          <datalist id="categoryOptions"></datalist>
+
+          <label class="date-field">
+            <input type="date" id="deadlineInput" class="date-input">
+          </label>
+
+          <button type="submit" class="add-btn">add it</button>
+        </form>
+        <p class="form-hint" id="formHint" role="alert"></p>
+      </section>
+
+    </main>
+
+    <div class="torn-edge" aria-hidden="true"></div>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
