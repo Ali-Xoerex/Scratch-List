@@ -213,6 +213,11 @@ body {
   gap: 10px;
   height: var(--line-height-row);
   padding: 0 2px;
+  transition: opacity 0.15s ease;
+}
+
+.task-row[hidden] {
+  display: none;
 }
 
 /* checkbox — hand-drawn box + tick */
@@ -290,6 +295,7 @@ body {
 }
 
 .category-tag {
+  position: relative;
   flex: none;
   font-size: 0.85rem;
   font-family: 'Patrick Hand', cursive;

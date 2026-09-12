@@ -26,16 +26,39 @@
         <div class="date-stamp" id="dateStamp" aria-hidden="true"></div>
       </header>
 
-      <nav class="filters" id="filters" aria-label="Filter by category">
-        <!-- filter chips injected by script.js -->
-      </nav>
+ <nav class="filters" id="filters" aria-label="Filter by category">
+  <button type="button" class="filter-chip active" data-category="">all</button>
+  {{range .Categories}}
+  <button type="button" class="filter-chip" data-category="{{.}}">{{.}}</button>
+  {{end}}
+</nav>
 
-      <section class="ruled-area" aria-label="Task list">
-        <ul class="task-list" id="taskList">
-          <!-- tasks injected by script.js -->
-        </ul>
-
-        <p class="empty-note" id="emptyNote" hidden>the page is blank &mdash; jot something down below</p>
+<section class="ruled-area" aria-label="Task list">
+  <ul class="task-list" id="taskList">
+    {{range .Tasks}}
+    <li class="task-row{{if .IsDone}} done{{end}}"
+        data-id="{{.ID}}"
+        data-category="{{.Category}}">
+      <span class="check-box">
+        <input type="checkbox"
+               class="task-check"
+               {{if .IsDone}}checked{{end}}
+               aria-label="Mark task as done">
+        <span class="box"></span>
+        <svg viewBox="0 0 30 30"><path d="M6 15.5 L12.5 21 L24 8" /></svg>
+        </span>
+        <span class="task-text">{{.Name}}</span>
+        <span class="category-tag" data-category="{{.Category}}">{{.Category}}</span>
+        {{if .Deadline}}
+        <span class="deadline-tag" data-deadline="{{.Deadline}}"></span>
+        {{end}}
+        <button type="button" class="delete-btn" aria-label="Delete task">✕</button>
+     </li>
+        {{end}}
+  </ul>
+        <p class="empty-note" id="emptyNote" {{if .Tasks}}hidden{{end}}>
+          the page is blank &mdash; jot something down below
+        </p>
 
         <form class="new-task-row" id="newTaskForm" novalidate>
           <span class="pencil-mark" aria-hidden="true">+</span>
@@ -58,7 +81,9 @@
             autocomplete="off"
             required
           >
-          <datalist id="categoryOptions"></datalist>
+          <datalist id="categoryOptions">
+            {{range .Categories}}<option value="{{.}}"></option>{{end}}
+          </datalist>
 
           <label class="date-field">
             <input type="date" id="deadlineInput" class="date-input">
