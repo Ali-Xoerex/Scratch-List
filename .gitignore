@@ -23,6 +23,10 @@ profile.cov
 # Go workspace file
 go.work
 go.work.sum
+go.sum
+
+# db files
+*.db
 
 # env file
 .env
