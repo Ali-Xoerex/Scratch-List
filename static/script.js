@@ -42,6 +42,12 @@
   const formHint    = document.getElementById("formHint");
   const dateStamp   = document.getElementById("dateStamp");
 
+  const deleteModal     = document.getElementById("deleteModal");
+  const confirmBtn      = document.getElementById("confirmDelete");
+  const cancelBtn       = document.getElementById("cancelDelete");
+  let pendingDeleteRow  = null;
+  let pendingDeleteId   = null;
+
   if (dateStamp) {
     dateStamp.textContent = new Date().toLocaleDateString(undefined, {
       weekday: "short", month: "short", day: "numeric",
@@ -157,23 +163,39 @@
     }
   });
 
-  taskListEl.addEventListener("click", async (e) => {
+  taskListEl.addEventListener("click", (e) => {
     const btn = e.target.closest(".delete-btn");
     if (!btn) return;
     const row = btn.closest(".task-row");
-    const id = row.dataset.id;
+    pendingDeleteRow = row;
+    pendingDeleteId = row.dataset.id;
+    deleteModal.hidden = false;
+  });
+
+  confirmBtn.addEventListener("click", async () => {
+    if (!pendingDeleteRow || !pendingDeleteId) return;
+    const row = pendingDeleteRow;
+    const id = pendingDeleteId;
+    deleteModal.hidden = true;
 
     row.style.opacity = "0.4";
-    btn.disabled = true;
+    pendingDeleteRow = null;
+    pendingDeleteId = null;
+
     try {
       await apiDelete(id);
       row.remove();
       applyFilter();
     } catch (err) {
       row.style.opacity = "";
-      btn.disabled = false;
       console.error(err);
     }
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    deleteModal.hidden = true;
+    pendingDeleteRow = null;
+    pendingDeleteId = null;
   });
 
   /* ---------------- new task form ---------------- */
